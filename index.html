@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FarVault • Penyimpanan File</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap">
+<style>
+:root{--bg:#07070f;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);--text:#eaf0ff;--muted:#8d97b5;--c1:#00e5ff;--c2:#a855f7;--c3:#ff2e93;--danger:#ff4d6d;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#07070f}}
+:root[data-theme="dark"]{--bg:#07070f}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;padding:16px;overflow-x:hidden;display:flex;flex-direction:column}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.55;z-index:-1;animation:float 12s ease-in-out infinite alternate}
+.o1{width:320px;height:320px;background:var(--c2);top:-80px;left:-80px}
+.o2{width:300px;height:300px;background:var(--c1);bottom:-80px;right:-60px;animation-delay:-4s}
+.o3{width:240px;height:240px;background:var(--c3);top:45%;left:55%;opacity:.3;animation-delay:-8s}
+@keyframes float{to{transform:translate(40px,-30px) scale(1.15)}}
+.box{width:100%;max-width:680px;margin:auto;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 0 40px rgba(168,85,247,.18)}
+h1{text-align:center;font-family:Orbitron,system-ui,sans-serif;font-size:22px;margin:0 0 14px;letter-spacing:1px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+label{font-size:13px;color:var(--muted)}
+input[type=text],input[type=password]{width:100%;padding:11px 12px;margin:6px 0 12px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.35);color:var(--text);font-size:15px;outline:none}
+input:focus{border-color:var(--c1);box-shadow:0 0 12px rgba(0,229,255,.4)}
+input[type=file]{width:100%;color:var(--muted);font-size:14px}
+button{background:linear-gradient(90deg,var(--c1),var(--c2));color:#05050a;font-weight:700;border:0;border-radius:10px;padding:9px 15px;font-size:14px;cursor:pointer;transition:.2s}
+button:hover{box-shadow:0 0 16px var(--c1);transform:translateY(-1px)}
+button.alt{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--line);font-weight:500}
+button.del{background:linear-gradient(90deg,var(--danger),var(--c3));color:#fff}
+.top{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;margin-bottom:14px;text-align:center}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px;margin-top:8px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px}
+.info{min-width:0}.info b{display:block;overflow-wrap:anywhere}.info small{color:var(--muted)}
+.btns{display:flex;gap:6px;flex-shrink:0;justify-content:center;flex-wrap:wrap}
+.err{color:var(--danger);font-size:14px;min-height:18px}
+.hello{text-align:center;font-family:Orbitron,system-ui,sans-serif;font-size:18px;font-weight:700;margin:0 0 16px;color:var(--c1);text-shadow:0 0 10px var(--c1),0 0 24px var(--c2);animation:glow 2s ease-in-out infinite alternate}
+@keyframes glow{from{opacity:.75}to{opacity:1}}
+.msg{color:var(--muted);font-size:14px}
+.hide{display:none}
+.admin{border:1px dashed var(--c2);border-radius:12px;padding:14px;margin:12px 0;background:rgba(168,85,247,.07)}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+
+<div id="gate" class="box">
+  <h1>⚡ FARVAULT</h1>
+  <label>Username</label>
+  <input type="text" id="gu" autocomplete="off">
+  <label>Password</label>
+  <input type="password" id="gp">
+  <div class="err" id="gerr"></div>
+  <button onclick="loginGate()">MASUK</button>
+</div>
+
+<div id="app" class="box hide">
+  <div class="top">
+    <h1>📁 FILE VAULT</h1>
+    <div class="btns">
+      <button class="alt" id="adminBtn" onclick="toggleAdmin()">Menu Admin</button>
+      <button class="alt" onclick="logoutGate()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="hello">FarNiBosAhay!🎮</div>
+
+  <div id="adminLogin" class="admin hide">
+    <b>Login Admin</b><br><br>
+    <input type="text" id="au" placeholder="Username admin" autocomplete="off">
+    <input type="password" id="ap" placeholder="Password admin">
+    <div class="err" id="aerr"></div>
+    <button onclick="loginAdmin()">Masuk Admin</button>
+  </div>
+
+  <div id="adminPanel" class="admin hide">
+    <b>Upload File (semua jenis, maks 4 MB per file)</b><br><br>
+    <input type="file" id="fileInput" multiple><br><br>
+    <button onclick="uploadFiles()" id="upBtn">Upload</button>
+    <button class="alt" onclick="logoutAdmin()">Keluar Admin</button>
+    <div class="err" id="uerr"></div>
+  </div>
+
+  <div id="note" class="msg"></div>
+  <div id="list"></div>
+</div>
+
+<script>
+var G = null, A = null, isAdmin = false, items = [];
+function $(id) { return document.getElementById(id); }
+
+async function api(body) {
+  var r = await fetch("/api", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({ gu: G.u, gp: G.p }, body)) });
+  var j = await r.json().catch(function () { return {}; });
+  if (!r.ok) throw (j.error || "error");
+  return j;
+}
+
+async function loginGate() {
+  G = { u: $("gu").value, p: $("gp").value };
+  try {
+    await api({ action: "list" });
+    try { sessionStorage.setItem("g", JSON.stringify(G)); } catch (e) {}
+    showApp();
+  } catch (e) { G = null; $("gerr").textContent = "Username atau password salah."; }
+}
+function logoutGate() { try { sessionStorage.removeItem("g"); } catch (e) {} location.reload(); }
+
+function showApp() {
+  $("gate").classList.add("hide");
+  $("app").classList.remove("hide");
+  load();
+}
+async function load() {
+  try { items = (await api({ action: "list" })).files; render(); }
+  catch (e) { $("note").textContent = "Gagal memuat daftar file."; }
+}
+
+function toggleAdmin() { if (!isAdmin) $("adminLogin").classList.toggle("hide"); }
+async function loginAdmin() {
+  var a = { u: $("au").value, p: $("ap").value };
+  try {
+    await api({ action: "checkadmin", au: a.u, ap: a.p });
+    A = a; isAdmin = true;
+    $("adminLogin").classList.add("hide");
+    $("adminPanel").classList.remove("hide");
+    $("adminBtn").classList.add("hide");
+    $("au").value = ""; $("ap").value = ""; $("aerr").textContent = "";
+    render();
+  } catch (e) { $("aerr").textContent = "Username atau password admin salah."; }
+}
+function logoutAdmin() {
+  isAdmin = false; A = null;
+  $("adminPanel").classList.add("hide");
+  $("adminBtn").classList.remove("hide");
+  render();
+}
+
+function toB64(file) {
+  return new Promise(function (ok, no) {
+    var r = new FileReader();
+    r.onload = function () { ok(String(r.result).split(",")[1] || ""); };
+    r.onerror = no;
+    r.readAsDataURL(file);
+  });
+}
+async function uploadFiles() {
+  var files = $("fileInput").files;
+  if (!isAdmin || !files.length) { $("uerr").textContent = "Pilih file dulu."; return; }
+  $("upBtn").disabled = true; $("uerr").textContent = "";
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (f.size === 0 || f.size > 4 * 1024 * 1024) { $("uerr").textContent = f.name + ": ukuran harus 1 byte – 4 MB."; continue; }
+    try {
+      $("uerr").textContent = "Mengunggah " + f.name + "...";
+      await api({ action: "upload", au: A.u, ap: A.p, name: f.name, size: f.size, data: await toB64(f) });
+      $("uerr").textContent = "";
+    } catch (e) { $("uerr").textContent = "Gagal upload " + f.name + " (" + e + ")"; }
+  }
+  $("fileInput").value = ""; $("upBtn").disabled = false;
+  load();
+}
+
+async function downloadFile(key) {
+  try {
+    var j = await api({ action: "download", key: key });
+    var bin = atob(j.data), u8 = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    var url = URL.createObjectURL(new Blob([u8]));
+    var a = document.createElement("a");
+    a.href = url; a.download = j.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  } catch (e) { alert("Gagal download file."); }
+}
+async function deleteFile(key) {
+  if (!isAdmin || !confirm("Hapus file ini untuk semua orang?")) return;
+  try { await api({ action: "delete", au: A.u, ap: A.p, key: key }); load(); }
+  catch (e) { alert("Gagal menghapus."); }
+}
+
+function fmtSize(b) {
+  if (b < 1024) return b + " B";
+  if (b < 1048576) return (b / 1024).toFixed(1) + " KB";
+  return (b / 1048576).toFixed(1) + " MB";
+}
+function render() {
+  var el = $("list");
+  el.textContent = "";
+  if (!items.length) { $("note").textContent = "Belum ada file."; return; }
+  $("note").textContent = "";
+  items.forEach(function (f) {
+    var row = document.createElement("div"); row.className = "row";
+    var info = document.createElement("div"); info.className = "info";
+    var b = document.createElement("b"); b.textContent = f.name;
+    var s = document.createElement("small"); s.textContent = fmtSize(f.size) + " • " + new Date(f.date).toLocaleDateString("id-ID");
+    info.appendChild(b); info.appendChild(s);
+    var btns = document.createElement("div"); btns.className = "btns";
+    var dl = document.createElement("button"); dl.textContent = "Download";
+    dl.onclick = function () { downloadFile(f.key); };
+    btns.appendChild(dl);
+    if (isAdmin) {
+      var del = document.createElement("button"); del.className = "del"; del.textContent = "Hapus";
+      del.onclick = function () { deleteFile(f.key); };
+      btns.appendChild(del);
+    }
+    row.appendChild(info); row.appendChild(btns);
+    el.appendChild(row);
+  });
+}
+
+$("gp").addEventListener("keydown", function (e) { if (e.key === "Enter") loginGate(); });
+$("ap").addEventListener("keydown", function (e) { if (e.key === "Enter") loginAdmin(); });
+try { var s = sessionStorage.getItem("g"); if (s) { G = JSON.parse(s); showApp(); } } catch (e) {}
+</script>
+</body>
+</html>
+  
